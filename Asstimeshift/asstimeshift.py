@@ -40,6 +40,21 @@ def calc_correction(t1, t2, f1, f2):
 
 def correct_time(bad_timestamp, k, b):
     return bad_timestamp * k + b
+    
+def asstimeshift(args, fi, fo):
+    k, b = calc_correction(args.t1, args.t2, args.f1, args.f2)
+    for line in fi:
+        line = line.rstrip()
+        # print (line)
+        m = re.match(r'^Dialogue: [0-9]+,([0-9]+:[0-9]+:[0-9]+(?:\.[0-9]+)?),([0-9]+:[0-9]+:[0-9]+(?:\.[0-9]+)?),', line)
+        if m:
+            d1, d2 = from_timestamp(m.group(1)), from_timestamp(m.group(2))
+            nd1 = to_timestamp(correct_time(d1, k, b))
+            nd2 = to_timestamp(correct_time(d2, k, b))
+
+            line = line.replace(m.group(1), nd1, 1)
+            line = line.replace(m.group(2), nd2, 1)
+        fo.write(line + "\n")
 
 def main():
     args = parse_args()
@@ -50,23 +65,12 @@ def main():
        args.f2 == None:
         raise RuntimeError("请输入字幕开始结束时间")
 
-    k, b = calc_correction(args.t1, args.t2, args.f1, args.f2)
+    if args.input == None or args.output == None:
+        raise RuntimeError("请输入和输出字幕文件名")
 
     with open(args.output, "w", encoding='utf-8') as fo:
         with open(args.input, "r", encoding='utf-8') as fi:
-            for line in fi:
-                line = line.rstrip()
-                # print (line)
-                m = re.match(r'^Dialogue: [0-9]+,([0-9]+:[0-9]+:[0-9]+(?:\.[0-9]+)?),([0-9]+:[0-9]+:[0-9]+(?:\.[0-9]+)?),', line)
-                if m:
-                    d1, d2 = from_timestamp(m.group(1)), from_timestamp(m.group(2))
-                    nd1 = to_timestamp(correct_time(d1, k, b))
-                    nd2 = to_timestamp(correct_time(d2, k, b))
-
-                    line = line.replace(m.group(1), nd1, 1)
-                    line = line.replace(m.group(2), nd2, 1)
-                fo.write(line + "\n")
-                
+            asstimeshift(args, fi, fo)
 
 if __name__ == "__main__":
     main()
