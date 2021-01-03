@@ -41,12 +41,16 @@ def calc_correction(t1, t2, f1, f2):
 def correct_time(bad_timestamp, k, b):
     return bad_timestamp * k + b
     
+def if_ass_timestamp_line(line):
+    m = re.match(r'^Dialogue: [0-9]+,([0-9]+:[0-9]+:[0-9]+(?:\.[0-9]+)?),([0-9]+:[0-9]+:[0-9]+(?:\.[0-9]+)?),', line)
+    return m
+    
 def asstimeshift(args, fi, fo):
     k, b = calc_correction(args.t1, args.t2, args.f1, args.f2)
     for line in fi:
         line = line.rstrip()
         # print (line)
-        m = re.match(r'^Dialogue: [0-9]+,([0-9]+:[0-9]+:[0-9]+(?:\.[0-9]+)?),([0-9]+:[0-9]+:[0-9]+(?:\.[0-9]+)?),', line)
+        m = if_ass_timestamp_line(line)
         if m:
             d1, d2 = from_timestamp(m.group(1)), from_timestamp(m.group(2))
             nd1 = to_timestamp(correct_time(d1, k, b))
