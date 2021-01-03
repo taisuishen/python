@@ -23,6 +23,9 @@ def from_timestamp(str):
 
 def to_timestamp(sec):
     "毫秒转换时间戳"
+    if sec < 0:
+        raise RuntimeError("错误的时间戳: {}".format(sec))
+
     hours = sec//3600000
     minutes = (sec - hours * 3600000) // 60000
     seconds =  (sec - hours * 3600000 - minutes * 60000) // 1000
