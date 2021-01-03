@@ -40,6 +40,18 @@ class TestAss(unittest.TestCase):
         b = 3600 * 1000
         r = asstimeshift.correct_time(bad_timestamp, k, b)
         self.assertEqual(r, asstimeshift.from_timestamp('1:30:00.00'))
-
+    
+    def test_if_ass_timestamp_line(self):
+        r = asstimeshift.if_ass_timestamp_line(r'Dialogue: 0,0:43:06.32,0:43:07.45,*Default,,0,0,0,,政府在干吗 \N{\fn微软雅黑}{\fs14}나라에서 뭐 하는 거야?')
+        self.assertNotEqual(r, None)
+        
+        r = asstimeshift.if_ass_timestamp_line(r'Dialogue: 00:43:06.32,0:43:07.45,*Default,,0,0,0,,政府在干吗 \N{\fn微软雅黑}{\fs14}나라에서 뭐 하는 거야?')
+        self.assertEqual(r, None)
+        
+        r = asstimeshift.if_ass_timestamp_line(r'Dialogue: 0,0:43:06,0:43:07,*Default,,0,0,0,,政府在干吗 \N{\fn微软雅黑}{\fs14}나라에서 뭐 하는 거야?')
+        self.assertNotEqual(r, None)
+        self.assertEqual(r.group(1), '0:43:06')
+        self.assertEqual(r.group(2), '0:43:07')
+        
 if __name__ == '__main__':
     unittest.main()
