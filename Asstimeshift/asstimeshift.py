@@ -1,4 +1,4 @@
-import argparse, re
+import argparse, re, sys
 
 class Timestamp():
     @staticmethod
@@ -81,6 +81,10 @@ def asstimeshift(args, fi, fo):
             
             nd1 = d1.correct(k, b)
             nd2 = d2.correct(k, b)
+            
+            if nd1.ts < 0 or nd2.ts < 0:
+                print("时间戳为负数，已被忽略:", line, file=sys.stderr)
+                continue
             
             line = line.replace(m.group(1), str(nd1), 1)
             line = line.replace(m.group(2), str(nd2), 1)
