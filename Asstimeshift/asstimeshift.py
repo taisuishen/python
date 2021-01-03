@@ -1,5 +1,21 @@
 import argparse, re
 
+class Timestamp():
+    def __init__(self, str=None):
+        self.ts = 0
+        if str:
+            self.ts = from_timestamp(str)
+        
+    def correct(self, k, b):
+        "返回修正的时间戳对象"
+        n = Timestamp()
+        n.ts = self.ts * k + b
+
+        return n
+    
+    def __str__(self):
+        return to_timestamp(self.ts)
+
 def parse_args():
     "处理命令行输入参数"
     parser = argparse.ArgumentParser("字幕调整时间轴")
@@ -53,12 +69,15 @@ def asstimeshift(args, fi, fo):
         # print (line)
         m = if_ass_timestamp_line(line)
         if m:
-            d1, d2 = from_timestamp(m.group(1)), from_timestamp(m.group(2))
-            nd1 = to_timestamp(correct_time(d1, k, b))
-            nd2 = to_timestamp(correct_time(d2, k, b))
+            d1 = Timestamp(m.group(1))
+            d2 = Timestamp(m.group(2))
+            
+            nd1 = d1.correct(k, b)
+            nd2 = d2.correct(k, b)
+            
+            line = line.replace(m.group(1), str(nd1), 1)
+            line = line.replace(m.group(2), str(nd2), 1)
 
-            line = line.replace(m.group(1), nd1, 1)
-            line = line.replace(m.group(2), nd2, 1)
         fo.write(line + "\n")
 
 def main():
