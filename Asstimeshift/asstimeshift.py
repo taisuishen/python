@@ -25,11 +25,11 @@ def to_timestamp(sec):
     "毫秒转换时间戳"
     if sec < 0:
         raise RuntimeError("错误的时间戳: {}".format(sec))
-
-    hours = sec//3600000
-    minutes = (sec - hours * 3600000) // 60000
-    seconds =  (sec - hours * 3600000 - minutes * 60000) // 1000
-    r = ((sec - hours * 3600000 - minutes * 60000 - seconds * 1000)) // 10
+        
+    hours, r = divmod(sec, 3600000)
+    minutes, r = divmod(r, 60000)
+    seconds, r = divmod(r, 1000)
+    r = r // 10
 
     return "%d:%02d:%02d.%02d" % (hours, minutes, seconds, r)
 
