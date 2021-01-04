@@ -22,6 +22,8 @@ class Application(tk.Frame):
         self.media_filename = None
         self.master.title("AssTimeshift")
         self.create_widgets()
+        self.l1 = []
+        self.l2 = []
 
     def call_mpv(self, seek_ts):
         if self.media_filename is None:
@@ -43,30 +45,44 @@ class Application(tk.Frame):
         "获取字幕的起始字幕和最后字幕，并设置台词显示"
         args = Argument()
         args.input = self.input_filename
-        f1, f2, f1_line, f2_line = ats.get_min_max_ass_line(args)
-        # print (f1, f2, f1_line, f2_line)
-
-        t1 = f1
-        t2 = f2
-
+        ass = ats.get_all_lines(args)
         self.input_text.delete(0, tk.END)
         self.input_text.insert(0, self.input_filename)
 
+        i = 0
+        self.l1 = {}
+        for k in sorted(ass):
+            self.l1[k] = ass[k]
+            i += 1
+            if i > 20:
+                break
+
+        self.l1 = list(self.l1.items())
+        self.line1.delete(0, tk.END)
+        self.line1.insert(0, '0: {}'.format(self.l1[0][1]))
+
+        i = 0
+        self.l2 = {}
+        for k in sorted(ass, reverse=True):
+            self.l2[k] = ass[k]
+            i += 1
+            if i > 20:
+                break
+
+        self.l2 = list(self.l2.items())
+        self.line2.delete(0, tk.END)
+        self.line2.insert(0, '0: {}'.format(self.l2[0][1]))
+
+        t1 = f1 = self.l1[0][0]
+        t2 = f2 = self.l2[0][0]
         self.f1.delete(0, tk.END)
         self.f1.insert(0, str(f1))
         self.t1.delete(0, tk.END)
         self.t1.insert(0, str(t1))
-
-        self.line1.delete(0, tk.END)
-        self.line1.insert(0, str(f1_line))
-
         self.f2.delete(0, tk.END)
         self.f2.insert(0, str(f2))
         self.t2.delete(0, tk.END)
         self.t2.insert(0, str(t2))
-
-        self.line2.delete(0, tk.END)
-        self.line2.insert(0, str(f2_line))
 
     def browserInput(self):
         filename = filedialog.askopenfilename(title = "选择输入字幕文件",
@@ -93,6 +109,26 @@ class Application(tk.Frame):
         self.media_filename = filename
         self.media.delete(0, tk.END)
         self.media.insert(0, str(self.media_filename))
+
+    def spin1(self):
+        i = int(self.line1.get())
+        t1 = f1 = self.l1[i][0]
+        self.f1.delete(0, tk.END)
+        self.f1.insert(0, str(f1))
+        self.t1.delete(0, tk.END)
+        self.t1.insert(0, str(t1))
+        self.line1.delete(0, tk.END)
+        self.line1.insert(0, '{}: {}'.format(i, self.l1[i][1]))
+
+    def spin2(self):
+        i = int(self.line2.get())
+        t2 = f2 = self.l2[i][0]
+        self.f2.delete(0, tk.END)
+        self.f2.insert(0, str(f2))
+        self.t2.delete(0, tk.END)
+        self.t2.insert(0, str(t2))
+        self.line2.delete(0, tk.END)
+        self.line2.insert(0, '{}: {}'.format(i, self.l2[i][1]))
 
     def create_widgets(self):
         input_frame = ttk.LabelFrame(self.master, text=' 字幕和媒体文件 ')
@@ -121,7 +157,7 @@ class Application(tk.Frame):
         self.t1.grid(column=3, row=0, sticky='W')
         ttk.Button(time_frame, text='mpv段落1', width=16, command=partial(self.call_mpv, self.f1)).grid(column=4, row=0, sticky='W')
         ttk.Label(time_frame, text='台词1').grid(column=0, row=1, sticky='W')
-        self.line1 = ttk.Spinbox(time_frame, text='台词1', width=60)
+        self.line1 = ttk.Spinbox(time_frame, text='台词1', width=60, command=self.spin1, from_=0, to=20)
         self.line1.grid(column=1, row=1, columnspan=4, sticky='W')
 
         ttk.Label(time_frame, text='字幕原始时间2').grid(column=0, row=2, sticky='W')
@@ -132,7 +168,7 @@ class Application(tk.Frame):
         self.t2.grid(column=3, row=2, sticky='W')
         ttk.Button(time_frame, text='mpv段落2', width=16, command=partial(self.call_mpv, self.f2)).grid(column=4, row=2, sticky='W')
         ttk.Label(time_frame, text='台词2').grid(column=0, row=3, sticky='W')
-        self.line2 = ttk.Spinbox(time_frame, text='台词2', width=60)
+        self.line2 = ttk.Spinbox(time_frame, text='台词2', width=60, command=self.spin2, from_=0, to=20)
         self.line2.grid(column=1, row=3, columnspan=4, sticky='W')
 
         for child in time_frame.winfo_children():
@@ -167,8 +203,6 @@ class Application(tk.Frame):
         self.time_frame = time_frame
 
     def process_ass(self):
-        print("开始转化")
-
         args = Argument()
         args.input = self.input_filename
         args.output = self.output_filename
@@ -181,7 +215,7 @@ class Application(tk.Frame):
             with open(args.input, "r", encoding='utf-8') as fi:
                 ats.asstimeshift(args, fi, fo)
 
-        tk.messagebox.showinfo('提示', '转换完成')
+        tk.messagebox.showinfo('提示', '转换完成:\n{}'.format(self.output_filename))
 
 def main():
     root = tk.Tk()
