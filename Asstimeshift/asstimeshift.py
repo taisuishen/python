@@ -7,6 +7,10 @@ class Timestamp():
         l = str.split(":")
         if len(l) != 3:
             raise RuntimeError("错误的时间戳")
+
+        if ',' in l[2]:
+            l[2] = l[2].replace(',', '.')
+
         hours, minutes , seconds = int(l[0]), int(l[1]), float(l[2])
 
         return (hours*3600 + minutes*60 + seconds) * 1000
