@@ -46,6 +46,21 @@ class Timestamp():
     
     def __truediv__(self, o):
         return self.ts / o.ts
+        
+    def __cmp__(a, b):
+        return (a.ts > b.ts) - (a.ts < b.ts)
+                
+    def __gt__(self, other):
+        return self.__cmp__(other) > 0
+        
+    def __lt__(self, other):
+        return self.__cmp__(other) < 0
+        
+    def __ge__(self, other):
+        return self.__cmp__(other) >= 0
+        
+    def __le__(self, other):
+        return self.__cmp__(other) <= 0
 
 def parse_args():
     "处理命令行输入参数"
@@ -60,7 +75,7 @@ def parse_args():
     return parser.parse_args()
 
 def calc_correction(t1, t2, f1, f2):
-    k = (t1 - t2) / (f1 - f2)
+    k = (t2 - t1) / (f2 - f1)
     b = t2.ts - k * f2.ts
     return k, b
 
@@ -68,6 +83,23 @@ TIMESTAMP_LINE_RE = re.compile(r'^Dialogue: [0-9]+,([0-9]+:[0-9]+:[0-9]+(?:\.[0-
 def if_ass_timestamp_line(line):
     m = TIMESTAMP_LINE_RE.match(line)
     return m
+
+def get_min_max_ass_line(args):
+    min_, max_ = None, None
+    min_line, max_line = None, None
+    with open(args.input, "r", encoding='utf-8') as fi:
+        for line in fi:
+            line = line.rstrip()
+            m = if_ass_timestamp_line(line)
+            if m:
+                start = Timestamp(m.group(1))
+                if min_ is None or start < min_:
+                    min_ = start
+                    min_line = line
+                if max_ is None or start > max_:
+                    max_ = start
+                    max_line = line
+    return min_, max_, min_line, max_line
     
 def asstimeshift(args, fi, fo):
     k, b = calc_correction(args.t1, args.t2, args.f1, args.f2)
@@ -75,6 +107,7 @@ def asstimeshift(args, fi, fo):
         line = line.rstrip()
         # print (line)
         m = if_ass_timestamp_line(line)
+        
         if m:
             d1 = Timestamp(m.group(1))
             d2 = Timestamp(m.group(2))
