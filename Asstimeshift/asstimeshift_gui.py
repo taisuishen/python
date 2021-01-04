@@ -15,6 +15,10 @@ class Argument:
 def mpv_runner(runlist):
     subprocess.call(runlist)
 
+def get_showtime_lua_path():
+    d = os.path.dirname(os.path.realpath(__file__))
+    return os.path.join(d, 'showtime.lua')
+
 class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
@@ -33,7 +37,7 @@ class Application(tk.Frame):
         seek_ts = ats.Timestamp(seek_ts.get())
         subfn = self.input_filename
         l = [ MPV,
-            "--script=showtime.lua",
+            "--script={}".format(get_showtime_lua_path()),
             "--pause",
             "--start={}".format(seek_ts.ts / 1000),
             "--sub-file={}".format(subfn), self.media_filename ]
