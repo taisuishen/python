@@ -209,19 +209,21 @@ class Application(tk.Frame):
         self.time_frame = time_frame
 
     def process_ass(self):
-        args = Argument()
-        args.input = self.input_filename
-        args.output = self.output_filename
-        args.t1 = ats.Timestamp(self.t1.get())
-        args.t2 = ats.Timestamp(self.t2.get())
-        args.f1 = ats.Timestamp(self.f1.get())
-        args.f2 = ats.Timestamp(self.f2.get())
+        try:
+            args = Argument()
+            args.input = self.input_filename
+            args.output = self.output_filename
+            args.t1 = ats.Timestamp(self.t1.get())
+            args.t2 = ats.Timestamp(self.t2.get())
+            args.f1 = ats.Timestamp(self.f1.get())
+            args.f2 = ats.Timestamp(self.f2.get())
 
-        with open(args.output, "w", encoding='utf-8') as fo:
-            with open(args.input, "r", encoding='utf-8') as fi:
-                ats.asstimeshift(args, fi, fo)
-
-        tk.messagebox.showinfo('提示', '转换完成:\n{}'.format(self.output_filename))
+            with open(args.output, "w", encoding='utf-8') as fo:
+                with open(args.input, "r", encoding='utf-8') as fi:
+                    ats.asstimeshift(args, fi, fo)
+            tk.messagebox.showinfo('提示', '转换完成:\n{}'.format(self.output_filename))
+        except Exception as e:
+            tk.messagebox.showerror('错误', '转换失败:\n{}'.format(str(e)))
 
 def main():
     root = tk.Tk()
