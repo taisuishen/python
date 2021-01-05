@@ -97,10 +97,19 @@ def calc_correction(t1, t2, f1, f2):
     b = t2.ts - k * f2.ts
     return k, b
 
-TIMESTAMP_LINE_RE = re.compile(r'^Dialogue: [0-9]+,([0-9]+:[0-9]+:[0-9]+(?:\.[0-9]+)?),([0-9]+:[0-9]+:[0-9]+(?:\.[0-9]+)?),')
+TIMESTAMP_TS = r'([0-9]+:[0-9]+:[0-9]+(?:\.[0-9]+)?)'
+TIMESTAMP_TS_RE = re.compile(TIMESTAMP_TS)
+TIMESTAMP_LINE_RE = re.compile(r'^Dialogue: [0-9]+,\s*'+TIMESTAMP_TS+',\s*'+TIMESTAMP_TS+',\s*')
+
 def if_ass_timestamp_line(line):
     m = TIMESTAMP_LINE_RE.match(line)
     return m
+
+def replace_ass_timestamp_line(line, nts1, nts2):
+    l = [ nts1, nts2 ]
+    it = iter(l)
+    line = re.sub(TIMESTAMP_TS_RE, lambda x: next(it), line)
+    return line
 
 FILTER_ASS_LINE_RE = re.compile(r'\{.*?\}')
 def filter_ass_line(line):
@@ -152,8 +161,7 @@ def asstimeshift(args, fi, fo):
                 warns.append(warn_msg)
                 continue
 
-            line = line.replace(m.group(1), str(nd1), 1)
-            line = line.replace(m.group(2), str(nd2), 1)
+            line = replace_ass_timestamp_line(line, str(nd1), str(nd2))
 
         fo.write(line + "\n")
 
