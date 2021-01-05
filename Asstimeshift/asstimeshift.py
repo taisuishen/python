@@ -53,21 +53,6 @@ class Timestamp():
     def __truediv__(self, o):
         return self.ts / o.ts
 
-    def __cmp__(a, b):
-        return (a.ts > b.ts) - (a.ts < b.ts)
-
-    def __gt__(self, other):
-        return self.__cmp__(other) > 0
-
-    def __lt__(self, other):
-        return self.__cmp__(other) < 0
-
-    def __ge__(self, other):
-        return self.__cmp__(other) >= 0
-
-    def __le__(self, other):
-        return self.__cmp__(other) <= 0
-
 def parse_args():
     "处理命令行输入参数"
     parser = argparse.ArgumentParser(description="字幕调整时间轴")
@@ -95,23 +80,6 @@ def filter_ass_line(line):
     if pos >= 0:
         line = line[pos+2:]
     return re.sub(r'\{.*?\}', '', line).replace(r'\N', '')
-
-def get_min_max_ass_line(args):
-    min_, max_ = None, None
-    min_line, max_line = None, None
-    with open(args.input, "r", encoding='utf-8') as fi:
-        for line in fi:
-            line = line.rstrip()
-            m = if_ass_timestamp_line(line)
-            if m:
-                start = Timestamp(m.group(1))
-                if min_ is None or start < min_:
-                    min_ = start
-                    min_line = filter_ass_line(line)
-                if max_ is None or start > max_:
-                    max_ = start
-                    max_line = filter_ass_line(line)
-    return min_, max_, min_line, max_line
 
 def get_all_lines(args):
     d = {}
