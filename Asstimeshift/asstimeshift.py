@@ -75,11 +75,12 @@ def if_ass_timestamp_line(line):
     m = TIMESTAMP_LINE_RE.match(line)
     return m
 
+FILTER_ASS_LINE_RE = re.compile(r'\{.*?\}')
 def filter_ass_line(line):
     pos = line.rfind(',,')
     if pos >= 0:
         line = line[pos+2:]
-    return re.sub(r'\{.*?\}', '', line).replace(r'\N', '')
+    return re.sub(FILTER_ASS_LINE_RE, '', line).replace(r'\N', '')
 
 def get_all_lines(args):
     d = {}
