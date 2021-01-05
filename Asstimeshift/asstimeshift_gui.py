@@ -62,25 +62,31 @@ class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
-        self.media_filename = None
         self.master.title("AssTimeshift")
+        self.master.resizable(False, False)
         self.create_widgets()
+
         self.l1 = []
         self.l2 = []
         self.input_filename = None
+        self.media_filename = None
 
     def call_mpv(self, seek_ts):
         if self.media_filename is None:
             tk.messagebox.showinfo('错误', '请设置媒体文件名')
             return
 
-        seek_ts = ats.Timestamp(seek_ts.get())
-        subfn = self.input_filename
+        seek_ts = seek_ts.get()
+        seek_ts = 0 if seek_ts == "" else seek_ts
+        seek_ts = ats.Timestamp(seek_ts)
+
         l = [ CONFIG['mpv'],
             "--script={}".format(get_showtime_lua_path()),
             "--pause",
-            "--start={}".format(seek_ts.ts / 1000),
-            "--sub-file={}".format(subfn), self.media_filename ]
+            "--start={}".format(seek_ts.ts / 1000) ]
+        if self.input_filename is not None:
+            l.append("--sub-file={}".format(self.input_filename))
+        l.append(self.media_filename)
         # print (l)
         t = threading.Thread(target=mpv_runner, args=(l,), daemon=True)
         t.start()
