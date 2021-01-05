@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
@@ -228,3 +230,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# vim: set sw=4 tabstop=4 expandtab :

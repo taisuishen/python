@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse, re, sys
 
 class Timestamp():
@@ -167,3 +169,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# vim: set sw=4 tabstop=4 expandtab :

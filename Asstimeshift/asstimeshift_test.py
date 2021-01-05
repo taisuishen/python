@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import unittest
 import asstimeshift
 
@@ -64,3 +66,5 @@ class TestAss(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+# vim: set sw=4 tabstop=4 expandtab :
