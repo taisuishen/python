@@ -2,6 +2,25 @@
 
 import argparse, re, sys
 
+try:
+    from chardet import detect as _chardet_detect
+except ImportError:
+    _chardet_detect = None
+
+def chardet_detect(bytes):
+    encoding = 'GBK'
+    if _chardet_detect is None:
+        return encoding
+    else:
+        r = _chardet_detect(bytes)
+
+    if r:
+        encoding = r['encoding']
+        if encoding == 'GB2312':
+            encoding = 'GBK'
+
+    return encoding
+
 class Timestamp():
     @staticmethod
     def from_timestamp(str_):
@@ -89,13 +108,24 @@ def filter_ass_line(line):
     return re.sub(FILTER_ASS_LINE_RE, '', line).replace(r'\N', '')
 
 def get_all_lines(args):
-    d = {}
-    with open(args.input, "r", encoding='utf-8') as fi:
+    def parse():
         for line in fi:
             line = line.rstrip()
             m = if_ass_timestamp_line(line)
             if m:
                 d[m.group(1)] = filter_ass_line(line)
+
+    d = {}
+
+    try:
+        with open(args.input, "r", encoding='utf-8') as fi:
+            parse()
+    except UnicodeDecodeError:
+        with open(args.input, "rb") as fi:
+            b = fi.read()
+        with open(args.input, "r", encoding=chardet_detect(b)) as fi:
+            parse()
+
     return d
 
 def asstimeshift(args, fi, fo):
@@ -144,8 +174,14 @@ def main():
         sys.exit(1)
 
     with open(args.output, "w", encoding='utf-8') as fo:
-        with open(args.input, "r", encoding='utf-8') as fi:
-            asstimeshift(args, fi, fo)
+        try:
+            with open(args.input, "r", encoding='utf-8') as fi:
+                asstimeshift(args, fi, fo)
+        except UnicodeDecodeError:
+            with open(args.input, "rb") as fi:
+                b = fi.read()
+            with open(args.input, "r", encoding=chardet_detect(b)) as fi:
+                asstimeshift(args, fi, fo)
 
 if __name__ == "__main__":
     main()
