@@ -33,14 +33,30 @@ class Timestamp():
                 v = float(str_)
             except TypeError as e:
                 raise RuntimeError("错误的时间戳")
-            return v * 1000
+            return int(v * 1000)
 
         if ',' in l[2]:
             l[2] = l[2].replace(',', '.')
 
-        hours, minutes , seconds = int(l[0]), int(l[1]), float(l[2])
+        hours, minutes = int(l[0]), int(l[1])
 
-        return (hours*3600 + minutes*60 + seconds) * 1000
+        dotp = l[2].find('.')
+        if dotp >= 0:
+            seconds = int(l[2][0:dotp])
+            r = int((hours*3600 + minutes*60 + seconds) * 1000)
+            ms = l[2][dotp+1:dotp+1+3]
+            if len(ms) == 1:
+                ms = int(ms) * 100
+            elif len(ms) == 2:
+                # ASS: 两位小数
+                ms = int(ms) * 10
+            else:
+                # SRT: 三位小数
+                ms = int(ms)
+            return r + ms
+
+        seconds = int(l[2])
+        return int((hours*3600 + minutes*60 + seconds) * 1000)
 
     @staticmethod
     def to_timestamp(sec):
@@ -51,7 +67,10 @@ class Timestamp():
         hours, r = divmod(sec, 3600000)
         minutes, r = divmod(r, 60000)
         seconds, r = divmod(r, 1000)
-        r = r // 10
+        r = round(r / 10)
+        if r >= 100:
+            seconds += 1
+            r -= 100
 
         return "%d:%02d:%02d.%02d" % (hours, minutes, seconds, r)
 
@@ -60,12 +79,12 @@ class Timestamp():
         if isinstance(str_, str):
             self.ts = self.from_timestamp(str_)
         elif str_ is not None:
-            self.ts = float(str_)
+            self.ts = int(str_)
 
     def correct(self, k, b):
         "返回修正的时间戳对象"
         n = Timestamp()
-        n.ts = self.ts * k + b
+        n.ts = int(self.ts * k + b)
 
         return n
 
