@@ -123,6 +123,7 @@ def get_all_lines(args):
         with open(args.input, "r", encoding='utf-8') as fi:
             parse()
     except UnicodeDecodeError:
+        d = {}
         with open(args.input, "rb") as fi:
             b = fi.read()
         with open(args.input, "r", encoding=chardet_detect(b)) as fi:
@@ -175,13 +176,14 @@ def main():
         parser.print_help()
         sys.exit(1)
 
-    with open(args.output, "w", encoding='utf-8') as fo:
-        try:
+    try:
+        with open(args.output, "w", encoding='utf-8') as fo:
             with open(args.input, "r", encoding='utf-8') as fi:
                 asstimeshift(args, fi, fo)
-        except UnicodeDecodeError:
-            with open(args.input, "rb") as fi:
-                b = fi.read()
+    except UnicodeDecodeError:
+        with open(args.input, "rb") as fi:
+            b = fi.read()
+        with open(args.output, "w", encoding='utf-8') as fo:
             with open(args.input, "r", encoding=chardet_detect(b)) as fi:
                 asstimeshift(args, fi, fo)
 

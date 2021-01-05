@@ -279,13 +279,14 @@ class Application(tk.Frame):
             args.f1 = ats.Timestamp(self.f1.get())
             args.f2 = ats.Timestamp(self.f2.get())
 
-            with open(args.output, "w", encoding='utf-8') as fo:
-                try:
+            try:
+                with open(args.output, "w", encoding='utf-8') as fo:
                     with open(args.input, "r", encoding='utf-8') as fi:
                         warns = ats.asstimeshift(args, fi, fo)
-                except UnicodeDecodeError:
-                    with open(args.input, "rb") as fi:
-                        b = fi.read()
+            except UnicodeDecodeError:
+                with open(args.input, "rb") as fi:
+                    b = fi.read()
+                with open(args.output, "w", encoding='utf-8') as fo:
                     with open(args.input, "r", encoding=ats.chardet_detect(b)) as fi:
                         warns = ats.asstimeshift(args, fi, fo)
 
