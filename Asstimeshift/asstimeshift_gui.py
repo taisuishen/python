@@ -293,6 +293,7 @@ class Application(tk.Frame):
             tk.messagebox.showinfo('提示', '转换完成:\n{}\n{}'.format(self.output_filename, "\n".join(warns)))
         except Exception as e:
             tk.messagebox.showerror('错误', '转换失败:\n{}'.format(str(e)))
+            raise (e)
 
 def main():
     root = tk.Tk()
