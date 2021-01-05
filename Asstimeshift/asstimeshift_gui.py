@@ -8,8 +8,8 @@ import os, subprocess
 from functools import partial
 import tkinter.messagebox
 import threading
-
-MPV = r"/usr/bin/mpv"
+import json
+import shutil
 
 class Argument:
     pass
@@ -20,6 +20,27 @@ def mpv_runner(runlist):
 def get_showtime_lua_path():
     d = os.path.dirname(os.path.realpath(__file__))
     return os.path.join(d, 'showtime.lua')
+
+def get_json_path():
+    d = os.path.dirname(os.path.realpath(__file__))
+    return os.path.join(d, 'config.json')
+
+DEFAULT_CONFIG = {
+    "mpv" : shutil.which('mpv'),
+    "ass_max_line" : 50,
+}
+
+def get_config_json():
+    path = get_json_path()
+    try:
+        with open(path, "r") as fi:
+            j = json.loads(fi.read())
+    except Exception:
+        j = DEFAULT_CONFIG
+
+    return j
+
+CONFIG = get_config_json()
 
 def get_dict_items(dict_, count, last=False):
     i = 0
@@ -48,7 +69,7 @@ class Application(tk.Frame):
 
         seek_ts = ats.Timestamp(seek_ts.get())
         subfn = self.input_filename
-        l = [ MPV,
+        l = [ CONFIG['mpv'],
             "--script={}".format(get_showtime_lua_path()),
             "--pause",
             "--start={}".format(seek_ts.ts / 1000),
@@ -65,11 +86,11 @@ class Application(tk.Frame):
         self.input_text.delete(0, tk.END)
         self.input_text.insert(0, self.input_filename)
 
-        self.l1 = get_dict_items(ass, 20+1, False)
+        self.l1 = get_dict_items(ass, CONFIG['ass_max_line']+1, False)
         self.line1.delete(0, tk.END)
         self.line1.insert(0, '0: {}'.format(self.l1[0][1]))
 
-        self.l2 = get_dict_items(ass, 20+1, True)
+        self.l2 = get_dict_items(ass, CONFIG['ass_max_line']+1, True)
         self.line2.delete(0, tk.END)
         self.line2.insert(0, '0: {}'.format(self.l2[0][1]))
 
@@ -157,7 +178,7 @@ class Application(tk.Frame):
         self.t1.grid(column=3, row=0, sticky='W')
         ttk.Button(time_frame, text='mpv段落1', width=16, command=partial(self.call_mpv, self.f1)).grid(column=4, row=0, sticky='W')
         ttk.Label(time_frame, text='台词1').grid(column=0, row=1, sticky='W')
-        self.line1 = ttk.Spinbox(time_frame, text='台词1', width=60, command=self.spin1, from_=0, to=20)
+        self.line1 = ttk.Spinbox(time_frame, text='台词1', width=60, command=self.spin1, from_=0, to=CONFIG['ass_max_line'])
         self.line1.grid(column=1, row=1, columnspan=4, sticky='W')
 
         ttk.Label(time_frame, text='字幕原始时间2').grid(column=0, row=2, sticky='W')
@@ -168,7 +189,7 @@ class Application(tk.Frame):
         self.t2.grid(column=3, row=2, sticky='W')
         ttk.Button(time_frame, text='mpv段落2', width=16, command=partial(self.call_mpv, self.f2)).grid(column=4, row=2, sticky='W')
         ttk.Label(time_frame, text='台词2').grid(column=0, row=3, sticky='W')
-        self.line2 = ttk.Spinbox(time_frame, text='台词2', width=60, command=self.spin2, from_=0, to=20)
+        self.line2 = ttk.Spinbox(time_frame, text='台词2', width=60, command=self.spin2, from_=0, to=CONFIG['ass_max_line'])
         self.line2.grid(column=1, row=3, columnspan=4, sticky='W')
 
         for child in time_frame.winfo_children():
