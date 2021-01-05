@@ -40,6 +40,12 @@ def get_config_json():
 
     return j
 
+def save_config_json(config):
+    path = get_json_path()
+    j = json.dumps(config)
+    with open(path, "w") as fo:
+        fo.write(j)
+
 CONFIG = get_config_json()
 
 def get_dict_items(dict_, count, last=False):
@@ -61,6 +67,7 @@ class Application(tk.Frame):
         self.create_widgets()
         self.l1 = []
         self.l2 = []
+        self.input_filename = None
 
     def call_mpv(self, seek_ts):
         if self.media_filename is None:
@@ -196,21 +203,54 @@ class Application(tk.Frame):
             child.grid_configure(padx=2, pady=2)
 
         def config_window():
+            def browserMPV():
+                filename = filedialog.askopenfilename(title = "选择MPV",
+                                                  filetypes = (
+                                                               ("all files",
+                                                                "*.*"),))
+                if not filename:
+                    return
+                mpv.delete(0, tk.END)
+                mpv.insert(0, filename)
+
+            def save_and_destroy():
+                CONFIG['mpv'] = mpv.get()
+                CONFIG['ass_max_line'] = int(ass_max_line.get())
+                save_config_json(CONFIG)
+
+                # 重设self.line1和self.line2的to属性
+                self.line1['to'] = CONFIG['ass_max_line']
+                self.line2['to'] = CONFIG['ass_max_line']
+
+                if self.input_filename:
+                    self.get_f1_f2_lines()
+
+                config_win.destroy()
+
             config_win = tk.Tk()
             config_win.resizable(False, False)
             config_win.title("配置")
 
-            mpv_frame = ttk.LabelFrame(config_win, text=' MPV ')
-            mpv_frame.grid(column=0, row=0, columnspan=7, padx=2, pady=5)
+            mpv_frame = ttk.LabelFrame(config_win, text=' 字幕配置 ')
+            mpv_frame.grid(column=0, row=0, padx=2, pady=5, columnspan=2)
 
-            ttk.Label(mpv_frame, text='MPV可执行文件路径').grid(column=0, row=0, sticky='W')
-            ttk.Entry(mpv_frame, width=20).grid(column=1, row=0, columnspan=5)
-            ttk.Button(mpv_frame, text='浏览').grid(column=6, row=0, sticky='W')
+            ttk.Label(mpv_frame, text='MPV可执行文件路径: ').grid(column=0, row=0, sticky='W')
+            mpv = ttk.Entry(mpv_frame)
+            mpv.grid(column=1, row=0)
+            mpv.delete(0, tk.END)
+            mpv.insert(0, CONFIG['mpv'])
+            ttk.Button(mpv_frame, text='浏览', command=browserMPV).grid(column=2, row=0, sticky='W')
+
+            ttk.Label(mpv_frame, text='最大字幕个数: ').grid(column=0, row=1, sticky='W')
+            ass_max_line = ttk.Spinbox(mpv_frame, width=30, from_=0, to=999)
+            ass_max_line.grid(column=1, row=1, columnspan=2)
+            ass_max_line.delete(0, tk.END)
+            ass_max_line.insert(0, CONFIG['ass_max_line'])
 
             cancel = ttk.Button(config_win, text='取消', command=config_win.destroy)
-            cancel.grid(column=0, row=1)
-            save = ttk.Button(config_win, text='保存', command=config_win.destroy)
-            save.grid(column=1, row=1)
+            cancel.grid(column=0, row=2)
+            save = ttk.Button(config_win, text='保存', command=save_and_destroy)
+            save.grid(column=1, row=2)
             config_win.bind('<Escape>', lambda x: config_win.destroy())
             config_win.mainloop()
 
