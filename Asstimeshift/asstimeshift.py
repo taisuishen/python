@@ -99,6 +99,7 @@ def get_all_lines(args):
     return d
 
 def asstimeshift(args, fi, fo):
+    warns = []
     k, b = calc_correction(args.t1, args.t2, args.f1, args.f2)
     for line in fi:
         line = line.rstrip()
@@ -113,13 +114,17 @@ def asstimeshift(args, fi, fo):
             nd2 = d2.correct(k, b)
 
             if nd1.ts < 0 or nd2.ts < 0:
-                print("时间戳为负数，已被忽略:", line, file=sys.stderr)
+                warn_msg = "警告: 时间戳为负数，已被忽略: {}".format(line)
+                print(warn_msg, file=sys.stderr)
+                warns.append(warn_msg)
                 continue
 
             line = line.replace(m.group(1), str(nd1), 1)
             line = line.replace(m.group(2), str(nd2), 1)
 
         fo.write(line + "\n")
+
+    return warns
 
 def main():
     parser = parse_args()

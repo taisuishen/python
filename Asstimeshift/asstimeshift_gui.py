@@ -220,8 +220,8 @@ class Application(tk.Frame):
 
             with open(args.output, "w", encoding='utf-8') as fo:
                 with open(args.input, "r", encoding='utf-8') as fi:
-                    ats.asstimeshift(args, fi, fo)
-            tk.messagebox.showinfo('提示', '转换完成:\n{}'.format(self.output_filename))
+                    warns = ats.asstimeshift(args, fi, fo)
+            tk.messagebox.showinfo('提示', '转换完成:\n{}\n{}'.format(self.output_filename, "\n".join(warns)))
         except Exception as e:
             tk.messagebox.showerror('错误', '转换失败:\n{}'.format(str(e)))
 
