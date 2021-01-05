@@ -68,7 +68,7 @@ class Timestamp():
 
 def parse_args():
     "处理命令行输入参数"
-    parser = argparse.ArgumentParser("字幕调整时间轴")
+    parser = argparse.ArgumentParser(description="字幕调整时间轴")
     parser.add_argument("-i", "--input", help="输入字幕文件名")
     parser.add_argument("-o", "--output", help="输出字幕文件名")
     parser.add_argument("--f1", help="原始字幕起始时间", type=Timestamp)
@@ -76,7 +76,7 @@ def parse_args():
     parser.add_argument("--t1", help="目标字幕起始时间", type=Timestamp)
     parser.add_argument("--t2", help="目标字幕结束时间", type=Timestamp)
 
-    return parser.parse_args()
+    return parser
 
 def calc_correction(t1, t2, f1, f2):
     k = (t2 - t1) / (f2 - f1)
@@ -145,16 +145,21 @@ def asstimeshift(args, fi, fo):
         fo.write(line + "\n")
 
 def main():
-    args = parse_args()
+    parser = parse_args()
+    args = parser.parse_args()
 
     if args.t1 == None or \
        args.t2 == None or \
        args.f1 == None or \
        args.f2 == None:
-        raise RuntimeError("请输入字幕开始结束时间")
+        print ("{}: 请输入字幕开始结束时间\n".format(parser.prog), file=sys.stderr)
+        parser.print_help()
+        sys.exit(1)
 
     if args.input == None or args.output == None:
-        raise RuntimeError("请输入和输出字幕文件名")
+        print ("{}: 请输入和输出字幕文件名\n".format(parser.prog), file=sys.stderr)
+        parser.print_help()
+        sys.exit(1)
 
     with open(args.output, "w", encoding='utf-8') as fo:
         with open(args.input, "r", encoding='utf-8') as fi:
