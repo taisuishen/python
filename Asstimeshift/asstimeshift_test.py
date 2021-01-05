@@ -18,17 +18,21 @@ class TestAss(unittest.TestCase):
         r = asstimeshift.Timestamp('01:02:03,377')
         self.assertEqual(3723377, r.ts)
 
+        # 支持以秒数导入
+        r = asstimeshift.Timestamp('1800')
+        self.assertEqual(1800000, r.ts)
+
+        r = asstimeshift.Timestamp('1800.0')
+        self.assertEqual(1800000, r.ts)
+
     def test_to_timestamp(self):
-        r = asstimeshift.Timestamp()
-        r.ts = 2668280
+        r = asstimeshift.Timestamp(2668280)
         self.assertEqual(str(r), '0:44:28.28')
 
-        r = asstimeshift.Timestamp()
-        r.ts = 0
+        r = asstimeshift.Timestamp(0)
         self.assertEqual(str(r), '0:00:00.00')
 
-        r = asstimeshift.Timestamp()
-        r.ts = (11*3600+11*60+11.11)*1000
+        r = asstimeshift.Timestamp((11*3600+11*60+11.11)*1000)
         self.assertEqual(str(r), '11:11:11.11')
 
         with self.assertRaises(RuntimeError):

@@ -4,11 +4,15 @@ import argparse, re, sys
 
 class Timestamp():
     @staticmethod
-    def from_timestamp(str):
+    def from_timestamp(str_):
         "时间戳转换为毫秒"
-        l = str.split(":")
+        l = str_.split(":")
         if len(l) != 3:
-            raise RuntimeError("错误的时间戳")
+            try:
+                v = float(str_)
+            except TypeError as e:
+                raise RuntimeError("错误的时间戳")
+            return v * 1000
 
         if ',' in l[2]:
             l[2] = l[2].replace(',', '.')
@@ -30,10 +34,12 @@ class Timestamp():
 
         return "%d:%02d:%02d.%02d" % (hours, minutes, seconds, r)
 
-    def __init__(self, str=None):
+    def __init__(self, str_=None):
         self.ts = 0
-        if str:
-            self.ts = self.from_timestamp(str)
+        if isinstance(str_, str):
+            self.ts = self.from_timestamp(str_)
+        elif str_ is not None:
+            self.ts = float(str_)
 
     def correct(self, k, b):
         "返回修正的时间戳对象"
