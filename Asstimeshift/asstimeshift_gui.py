@@ -10,6 +10,7 @@ import tkinter.messagebox
 import threading
 import json
 import shutil
+import sys
 
 class Argument:
     pass
@@ -24,6 +25,9 @@ def get_showtime_lua_path():
 def get_json_path():
     d = os.path.dirname(os.path.realpath(__file__))
     return os.path.join(d, 'config.json')
+
+def get_output_ass_path(ass_path):
+    return os.path.splitext(ass_path)[0] + ".fixed.ass"
 
 DEFAULT_CONFIG = {
     "mpv" : shutil.which('mpv'),
@@ -64,12 +68,20 @@ class Application(tk.Frame):
         self.master = master
         self.master.title("AssTimeshift")
         self.master.resizable(False, False)
-        self.create_widgets()
 
         self.l1 = []
         self.l2 = []
         self.input_filename = None
         self.media_filename = None
+
+        self.create_widgets()
+
+        if len(sys.argv) > 1:
+            self.input_filename = sys.argv[1]
+            self.output_filename = get_output_ass_path(self.input_filename)
+
+        if self.input_filename is not None:
+            self.get_f1_f2_lines()
 
     def call_mpv(self, seek_ts):
         if self.media_filename is None:
@@ -127,7 +139,7 @@ class Application(tk.Frame):
         if not filename:
             return
         self.input_filename = filename
-        self.output_filename = os.path.splitext(filename)[0] + ".fixed.ass"
+        self.output_filename = get_output_ass_path(self.input_filename)
         print (self.input_filename)
         print (self.output_filename)
         self.get_f1_f2_lines()
