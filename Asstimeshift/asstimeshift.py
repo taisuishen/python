@@ -3,7 +3,9 @@
 import argparse, re, sys
 
 try:
+    from functools import lru_cache
     from chardet import detect as _chardet_detect
+    _chardet_detect = lru_cache(_chardet_detect)
 except ImportError:
     _chardet_detect = None
 
