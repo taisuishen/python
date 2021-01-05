@@ -30,7 +30,7 @@ def get_output_ass_path(ass_path):
     return os.path.splitext(ass_path)[0] + ".fixed.ass"
 
 DEFAULT_CONFIG = {
-    "mpv" : shutil.which('mpv'),
+    "mpv" : "" if shutil.which('mpv') is None else shutil.which('mpv'),
     "ass_max_line" : 50,
 }
 
