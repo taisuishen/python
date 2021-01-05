@@ -21,6 +21,16 @@ def get_showtime_lua_path():
     d = os.path.dirname(os.path.realpath(__file__))
     return os.path.join(d, 'showtime.lua')
 
+def get_dict_items(dict_, count, last=False):
+    i = 0
+    d = {}
+    for k in sorted(dict_, reverse=last):
+        d[k] = dict_[k]
+        i += 1
+        if i >= count:
+            break
+    return list(d.items())
+
 class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
@@ -48,34 +58,18 @@ class Application(tk.Frame):
         t.start()
 
     def get_f1_f2_lines(self):
-        "获取字幕的起始字幕和最后字幕，并设置台词显示"
+        "设置台词和时间戳显示"
         args = Argument()
         args.input = self.input_filename
         ass = ats.get_all_lines(args)
         self.input_text.delete(0, tk.END)
         self.input_text.insert(0, self.input_filename)
 
-        i = 0
-        self.l1 = {}
-        for k in sorted(ass):
-            self.l1[k] = ass[k]
-            i += 1
-            if i > 20:
-                break
-
-        self.l1 = list(self.l1.items())
+        self.l1 = get_dict_items(ass, 20+1, False)
         self.line1.delete(0, tk.END)
         self.line1.insert(0, '0: {}'.format(self.l1[0][1]))
 
-        i = 0
-        self.l2 = {}
-        for k in sorted(ass, reverse=True):
-            self.l2[k] = ass[k]
-            i += 1
-            if i > 20:
-                break
-
-        self.l2 = list(self.l2.items())
+        self.l2 = get_dict_items(ass, 20+1, True)
         self.line2.delete(0, tk.END)
         self.line2.insert(0, '0: {}'.format(self.l2[0][1]))
 
