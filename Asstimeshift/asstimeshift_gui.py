@@ -260,7 +260,7 @@ class Application(tk.Frame):
             ttk.Button(mpv_frame, text='浏览', command=browserMPV).grid(column=2, row=0, sticky='W')
 
             ttk.Label(mpv_frame, text='最大字幕个数: ').grid(column=0, row=1, sticky='W')
-            ass_max_line = ttk.Spinbox(mpv_frame, width=30, from_=0, to=999)
+            ass_max_line = ttk.Spinbox(mpv_frame, width=28, from_=0, to=999)
             ass_max_line.grid(column=1, row=1, columnspan=2)
             ass_max_line.delete(0, tk.END)
             ass_max_line.insert(0, CONFIG['ass_max_line'])
