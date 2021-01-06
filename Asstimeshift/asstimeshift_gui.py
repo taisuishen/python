@@ -293,7 +293,7 @@ class Application(tk.Frame):
 
             try:
                 with open(args.output, "w", encoding='utf-8') as fo:
-                    with open(args.input, "r", encoding='utf-8') as fi:
+                    with open(args.input, "r", encoding='utf-8-sig') as fi:
                         warns = ats.asstimeshift(args, fi, fo)
             except UnicodeDecodeError:
                 with open(args.input, "rb") as fi:

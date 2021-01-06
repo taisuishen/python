@@ -148,7 +148,7 @@ def get_all_lines(args):
     d = {}
 
     try:
-        with open(args.input, "r", encoding='utf-8') as fi:
+        with open(args.input, "r", encoding='utf-8-sig') as fi:
             parse()
     except UnicodeDecodeError:
         d = {}
@@ -205,7 +205,7 @@ def main():
 
     try:
         with open(args.output, "w", encoding='utf-8') as fo:
-            with open(args.input, "r", encoding='utf-8') as fi:
+            with open(args.input, "r", encoding='utf-8-sig') as fi:
                 asstimeshift(args, fi, fo)
     except UnicodeDecodeError:
         with open(args.input, "rb") as fi:
